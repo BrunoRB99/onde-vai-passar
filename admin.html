@@ -12,6 +12,22 @@
 </head>
 </head>
 <body>
+
+  <!-- PROTEÇÃO ADMIN -->
+  <script>
+    (function() {
+      const SENHA = 'sua-senha-aqui'; // ← troque pela sua senha
+      const chave = 'admin_autenticado';
+      if (sessionStorage.getItem(chave) !== 'sim') {
+        const tentativa = prompt('🔐 Digite a senha de acesso:');
+        if (tentativa !== SENHA) {
+          document.write('<h2 style="font-family:sans-serif;text-align:center;margin-top:20%">⛔ Acesso negado.</h2>');
+          throw new Error('Acesso negado');
+        }
+        sessionStorage.setItem(chave, 'sim');
+      }
+    })();
+  </script>
   <header class="header">
     <div class="header-inner">
       <span class="header-icon">📺</span>
