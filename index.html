@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Onde Vai Passar?</title>
+  <link rel="stylesheet" href="style.css" />
+    <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+</head>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <span class="header-icon">📺</span>
+      <h1>Onde Vai Passar?</h1>
+    </div>
+    <div class="header-date-nav">
+  <button class="nav-data-btn" onclick="mudarData(-1)">&#8592;</button>
+  <span id="headerDate"></span>
+  <button class="nav-data-btn" onclick="mudarData(1)">&#8594;</button>
+  <button class="btn-hoje" id="btnHoje" onclick="irParaHoje()" style="display:none;">Hoje</button>
+</div>
+  </header>
+
+  <nav class="abas-container">
+    <div class="abas" id="abas">
+      <button class="aba ativa" data-esporte="todos">🎯 Todos</button>
+      <button class="aba" data-esporte="Futebol">⚽ Futebol</button>
+      <button class="aba" data-esporte="Vôlei">🏐 Vôlei</button>
+      <button class="aba" data-esporte="Basquete">🏀 Basquete</button>
+      <button class="aba" data-esporte="Futebol Americano">🏈 Futebol Americano</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div id="jogosContainer"></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+  verificarStatusAutomatico(); // 1º atualiza os status no localStorage
+  renderJogos();               // 2º renderiza com os dados já corretos
+  setInterval(() => {
+    verificarStatusAutomatico();
+    renderLista();
+  }, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Onde Vai Passar? — Admin</title>
+  <link rel="stylesheet" href="style.css" />
+    <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+</head>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <span class="header-icon">📺</span>
+      <h1>Onde Vai Passar? — Admin</h1>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- GERENCIAR ESPORTES -->
+    <section class="card">
+      <h2>🏅 Gerenciar Esportes</h2>
+
+      <div class="inline-add">
+        <input type="text" id="inputNovoEsporte" placeholder="Ex: Futebol, Vôlei, Basquete..." />
+        <button type="button" class="btn-save btn-sm" onclick="adicionarEsporte()">＋ Adicionar</button>
+      </div>
+
+      <div id="listaEsportes" class="tag-list">
+        <p class="empty-msg">Nenhum esporte cadastrado.</p>
+      </div>
+    </section>
+
+    <!-- GERENCIAR CAMPEONATOS -->
+    <section class="card">
+      <h2>🏆 Gerenciar Campeonatos</h2>
+
+      <div class="form-group">
+        <label>Esporte</label>
+        <select id="esporteCampeonato" onchange="renderCampeonatosPorEsporte()">
+          <option value="">— Selecione um esporte primeiro —</option>
+        </select>
+      </div>
+
+      <div id="blocoCampeonato" style="display:none;">
+        <div class="inline-add">
+  <input type="text" id="inputNovoCampeonato" placeholder="Ex: Brasileirão Série A..." />
+  <input type="text" id="inputBandeiraCampeonato" placeholder="🇧🇷 Bandeira (emoji)" style="max-width:130px;" />
+  <button type="button" class="btn-save btn-sm" onclick="adicionarCampeonato()">＋ Adicionar</button>
+</div>
+        <div id="listaCampeonatos" class="tag-list">
+          <p class="empty-msg">Nenhum campeonato cadastrado para este esporte.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- FORM ADICIONAR/EDITAR JOGO -->
+<section class="card">
+  <div class="modo-lote-toggle">
+    <label class="switch-label">
+      <input type="checkbox" id="modoLote" onchange="toggleModoLote()">
+      <span class="switch-track"></span>
+      <span class="switch-text">Modo em lote <small>(mantém esporte, campeonato e rodada)</small></span>
+    </label>
+  </div>
+  <h2><span>➕</span> <span id="formTitle">Adicionar Jogo</span></h2>
+      <form id="formJogo">
+        <input type="hidden" id="editId" value="" />
+
+        <!-- ESPORTE -->
+        <div class="form-group">
+          <label>Esporte</label>
+          <select id="esporteJogo" onchange="carregarCampeonatosNoForm()" required>
+            <option value="">— Selecione o esporte —</option>
+          </select>
+        </div>
+
+        <!-- CAMPEONATO -->
+        <div class="form-group">
+          <label>Campeonato</label>
+          <select id="campeonato" required>
+            <option value="">— Selecione o campeonato —</option>
+          </select>
+        </div>
+
+        <!-- MANDANTE / VISITANTE -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mandante</label>
+            <input type="text" id="mandante" placeholder="Ex: Brasil" required />
+            <div class="form-group">
+  <label>Logo Mandante</label>
+  <input type="text" id="logoMandante" placeholder="URL do escudo" />
+</div>
+          </div>
+          <div class="form-group">
+            <label>Visitante</label>
+            <input type="text" id="visitante" placeholder="Ex: Argentina" required />
+            <div class="form-group">
+  <label>Logo Visitante</label>
+  <input type="text" id="logoVisitante" placeholder="URL do escudo" />
+</div>
+          </div>
+        </div>
+
+        <!-- HORÁRIO / RODADA -->
+        <div class="form-row">
+  <div class="form-group">
+    <label>Data</label>
+    <input type="date" id="dataJogo" required />
+  </div>
+  <div class="form-group">
+    <label>Horário</label>
+    <input type="time" id="horario" required />
+  </div>
+          <div class="form-group">
+            <label>Rodada</label>
+            <input type="text" id="rodada" placeholder="Ex: 3ª Rodada" />
+          </div>
+        </div>
+
+        <!-- STATUS -->
+        <div class="form-group">
+          <label>Status</label>
+          <select id="status">
+            <option value="agendado">📅 Agendado</option>
+            <option value="aovivo">🔴 Ao Vivo</option>
+            <option value="pausado">⏸️ Pausado</option>
+            <option value="encerrado">✅ Encerrado</option>
+          </select>
+        </div>
+
+        <!-- CANAIS -->
+        <div class="form-group">
+          <label>Canais de Transmissão</label>
+          <input type="text" id="canais" placeholder="Ex: Globo, SporTV, Disney+" required />
+          <small>Separe múltiplos canais com vírgula</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save" id="btnSalvar">✅ Salvar Jogo</button>
+          <button type="button" class="btn-cancel" id="btnCancelar"
+            style="display:none;" onclick="cancelarEdicao()">✖ Cancelar</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- LISTA DE JOGOS -->
+    <section class="card">
+      <div class="section-header">
+        <h2>📋 Jogos Cadastrados</h2>
+        <button class="btn-danger-outline" onclick="limparTodos()">🗑️ Limpar Todos</button>
+      </div>
+      <div id="tabelaJogos">
+        <p class="empty-msg">Nenhum jogo cadastrado.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+  <script>initAdmin();</script>
+</body>
+</html>
