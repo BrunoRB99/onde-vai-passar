@@ -5,181 +5,250 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Onde Vai Passar? — Admin</title>
   <link rel="stylesheet" href="style.css" />
-    <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <style>
+    #telaLogin {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+    }
+    .login-box {
+      background: #1e293b;
+      padding: 40px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .login-box h2 { color: #fff; margin-bottom: 24px; }
+    .login-box input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .login-box button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: #1d4ed8; }
+    #loginErro { color: #f87171; margin-top: 10px; font-size: 14px; }
+    .btn-logout {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
 </head>
-</head>
-<body>
 
-  <!-- PROTEÇÃO ADMIN -->
-  <script>
-    (function() {
-      const SENHA = 'sua-senha-aqui'; // ← troque pela sua senha
-      const chave = 'admin_autenticado';
-      if (sessionStorage.getItem(chave) !== 'sim') {
-        const tentativa = prompt('🔐 Digite a senha de acesso:');
-        if (tentativa !== SENHA) {
-          document.write('<h2 style="font-family:sans-serif;text-align:center;margin-top:20%">⛔ Acesso negado.</h2>');
-          throw new Error('Acesso negado');
-        }
-        sessionStorage.setItem(chave, 'sim');
-      }
-    })();
-  </script>
-  <header class="header">
-    <div class="header-inner">
-      <span class="header-icon">📺</span>
-      <h1>Onde Vai Passar? — Admin</h1>
+<body style="display:none">
+
+  <!-- TELA DE LOGIN -->
+  <div id="telaLogin" style="display:none">
+    <div class="login-box">
+      <h2>🔐 Admin</h2>
+      <input id="loginEmail" type="email" placeholder="Email" />
+      <input id="loginSenha" type="password" placeholder="Senha" 
+        onkeydown="if(event.key==='Enter') fazerLogin()" />
+      <button onclick="fazerLogin()">Entrar</button>
+      <p id="loginErro"></p>
     </div>
-  </header>
-
-  <main class="container">
-
-    <!-- GERENCIAR ESPORTES -->
-    <section class="card">
-      <h2>🏅 Gerenciar Esportes</h2>
-
-      <div class="inline-add">
-        <input type="text" id="inputNovoEsporte" placeholder="Ex: Futebol, Vôlei, Basquete..." />
-        <button type="button" class="btn-save btn-sm" onclick="adicionarEsporte()">＋ Adicionar</button>
-      </div>
-
-      <div id="listaEsportes" class="tag-list">
-        <p class="empty-msg">Nenhum esporte cadastrado.</p>
-      </div>
-    </section>
-
-    <!-- GERENCIAR CAMPEONATOS -->
-    <section class="card">
-      <h2>🏆 Gerenciar Campeonatos</h2>
-
-      <div class="form-group">
-        <label>Esporte</label>
-        <select id="esporteCampeonato" onchange="renderCampeonatosPorEsporte()">
-          <option value="">— Selecione um esporte primeiro —</option>
-        </select>
-      </div>
-
-      <div id="blocoCampeonato" style="display:none;">
-        <div class="inline-add">
-  <input type="text" id="inputNovoCampeonato" placeholder="Ex: Brasileirão Série A..." />
-  <input type="text" id="inputBandeiraCampeonato" placeholder="🇧🇷 Bandeira (emoji)" style="max-width:130px;" />
-  <button type="button" class="btn-save btn-sm" onclick="adicionarCampeonato()">＋ Adicionar</button>
-</div>
-        <div id="listaCampeonatos" class="tag-list">
-          <p class="empty-msg">Nenhum campeonato cadastrado para este esporte.</p>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- FORM ADICIONAR/EDITAR JOGO -->
-<section class="card">
-  <div class="modo-lote-toggle">
-    <label class="switch-label">
-      <input type="checkbox" id="modoLote" onchange="toggleModoLote()">
-      <span class="switch-track"></span>
-      <span class="switch-text">Modo em lote <small>(mantém esporte, campeonato e rodada)</small></span>
-    </label>
   </div>
-  <h2><span>➕</span> <span id="formTitle">Adicionar Jogo</span></h2>
-      <form id="formJogo">
-        <input type="hidden" id="editId" value="" />
 
-        <!-- ESPORTE -->
+  <!-- CONTEÚDO ADMIN -->
+  <div id="conteudoAdmin" style="display:none">
+
+    <header class="header">
+      <div class="header-inner">
+        <span class="header-icon">📺</span>
+        <h1>Onde Vai Passar? — Admin</h1>
+        <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- GERENCIAR ESPORTES -->
+      <section class="card">
+        <h2>🏅 Gerenciar Esportes</h2>
+        <div class="inline-add">
+          <input type="text" id="inputNovoEsporte" placeholder="Ex: Futebol, Vôlei, Basquete..." />
+          <button type="button" class="btn-save btn-sm" onclick="adicionarEsporte()">＋ Adicionar</button>
+        </div>
+        <div id="listaEsportes" class="tag-list">
+          <p class="empty-msg">Nenhum esporte cadastrado.</p>
+        </div>
+      </section>
+
+      <!-- GERENCIAR CAMPEONATOS -->
+      <section class="card">
+        <h2>🏆 Gerenciar Campeonatos</h2>
         <div class="form-group">
           <label>Esporte</label>
-          <select id="esporteJogo" onchange="carregarCampeonatosNoForm()" required>
-            <option value="">— Selecione o esporte —</option>
+          <select id="esporteCampeonato" onchange="renderCampeonatosPorEsporte()">
+            <option value="">— Selecione um esporte primeiro —</option>
           </select>
         </div>
-
-        <!-- CAMPEONATO -->
-        <div class="form-group">
-          <label>Campeonato</label>
-          <select id="campeonato" required>
-            <option value="">— Selecione o campeonato —</option>
-          </select>
+        <div id="blocoCampeonato" style="display:none;">
+          <div class="inline-add">
+            <input type="text" id="inputNovoCampeonato" placeholder="Ex: Brasileirão Série A..." />
+            <input type="text" id="inputBandeiraCampeonato" placeholder="🇧🇷 Bandeira (emoji)" style="max-width:130px;" />
+            <button type="button" class="btn-save btn-sm" onclick="adicionarCampeonato()">＋ Adicionar</button>
+          </div>
+          <div id="listaCampeonatos" class="tag-list">
+            <p class="empty-msg">Nenhum campeonato cadastrado para este esporte.</p>
+          </div>
         </div>
+      </section>
 
-        <!-- MANDANTE / VISITANTE -->
-        <div class="form-row">
+      <!-- FORM ADICIONAR/EDITAR JOGO -->
+      <section class="card">
+        <div class="modo-lote-toggle">
+          <label class="switch-label">
+            <input type="checkbox" id="modoLote" onchange="toggleModoLote()">
+            <span class="switch-track"></span>
+            <span class="switch-text">Modo em lote <small>(mantém esporte, campeonato e rodada)</small></span>
+          </label>
+        </div>
+        <h2><span>➕</span> <span id="formTitle">Adicionar Jogo</span></h2>
+        <form id="formJogo">
+          <input type="hidden" id="editId" value="" />
+
           <div class="form-group">
-            <label>Mandante</label>
-            <input type="text" id="mandante" placeholder="Ex: Brasil" required />
+            <label>Esporte</label>
+            <select id="esporteJogo" onchange="carregarCampeonatosNoForm()" required>
+              <option value="">— Selecione o esporte —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Campeonato</label>
+            <select id="campeonato" required>
+              <option value="">— Selecione o campeonato —</option>
+            </select>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
-  <label>Logo Mandante</label>
-  <input type="text" id="logoMandante" placeholder="URL do escudo" />
-</div>
-          </div>
-          <div class="form-group">
-            <label>Visitante</label>
-            <input type="text" id="visitante" placeholder="Ex: Argentina" required />
+              <label>Mandante</label>
+              <input type="text" id="mandante" placeholder="Ex: Brasil" required />
+              <div class="form-group">
+                <label>Logo Mandante</label>
+                <input type="text" id="logoMandante" placeholder="URL do escudo" />
+              </div>
+            </div>
             <div class="form-group">
-  <label>Logo Visitante</label>
-  <input type="text" id="logoVisitante" placeholder="URL do escudo" />
-</div>
+              <label>Visitante</label>
+              <input type="text" id="visitante" placeholder="Ex: Argentina" required />
+              <div class="form-group">
+                <label>Logo Visitante</label>
+                <input type="text" id="logoVisitante" placeholder="URL do escudo" />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- HORÁRIO / RODADA -->
-        <div class="form-row">
-  <div class="form-group">
-    <label>Data</label>
-    <input type="date" id="dataJogo" required />
-  </div>
-  <div class="form-group">
-    <label>Horário</label>
-    <input type="time" id="horario" required />
-  </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="dataJogo" required />
+            </div>
+            <div class="form-group">
+              <label>Horário</label>
+              <input type="time" id="horario" required />
+            </div>
+            <div class="form-group">
+              <label>Rodada</label>
+              <input type="text" id="rodada" placeholder="Ex: 3ª Rodada" />
+            </div>
+          </div>
+
           <div class="form-group">
-            <label>Rodada</label>
-            <input type="text" id="rodada" placeholder="Ex: 3ª Rodada" />
+            <label>Status</label>
+            <select id="status">
+              <option value="agendado">📅 Agendado</option>
+              <option value="aovivo">🔴 Ao Vivo</option>
+              <option value="pausado">⏸️ Pausado</option>
+              <option value="encerrado">✅ Encerrado</option>
+            </select>
           </div>
+
+          <div class="form-group">
+            <label>Canais de Transmissão</label>
+            <input type="text" id="canais" placeholder="Ex: Globo, SporTV, Disney+" required />
+            <small>Separe múltiplos canais com vírgula</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save" id="btnSalvar">✅ Salvar Jogo</button>
+            <button type="button" class="btn-cancel" id="btnCancelar"
+              style="display:none;" onclick="cancelarEdicao()">✖ Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- LISTA DE JOGOS -->
+      <section class="card">
+        <div class="section-header">
+          <h2>📋 Jogos Cadastrados</h2>
+          <button class="btn-danger-outline" onclick="limparTodos()">🗑️ Limpar Todos</button>
         </div>
-
-        <!-- STATUS -->
-        <div class="form-group">
-          <label>Status</label>
-          <select id="status">
-            <option value="agendado">📅 Agendado</option>
-            <option value="aovivo">🔴 Ao Vivo</option>
-            <option value="pausado">⏸️ Pausado</option>
-            <option value="encerrado">✅ Encerrado</option>
-          </select>
+        <div id="tabelaJogos">
+          <p class="empty-msg">Nenhum jogo cadastrado.</p>
         </div>
+      </section>
 
-        <!-- CANAIS -->
-        <div class="form-group">
-          <label>Canais de Transmissão</label>
-          <input type="text" id="canais" placeholder="Ex: Globo, SporTV, Disney+" required />
-          <small>Separe múltiplos canais com vírgula</small>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-save" id="btnSalvar">✅ Salvar Jogo</button>
-          <button type="button" class="btn-cancel" id="btnCancelar"
-            style="display:none;" onclick="cancelarEdicao()">✖ Cancelar</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- LISTA DE JOGOS -->
-    <section class="card">
-      <div class="section-header">
-        <h2>📋 Jogos Cadastrados</h2>
-        <button class="btn-danger-outline" onclick="limparTodos()">🗑️ Limpar Todos</button>
-      </div>
-      <div id="tabelaJogos">
-        <p class="empty-msg">Nenhum jogo cadastrado.</p>
-      </div>
-    </section>
-
-  </main>
+    </main>
+  </div>
 
   <script src="app.js"></script>
-  <script>initAdmin();</script>
+  <script>
+    firebase.auth().onAuthStateChanged(function(user) {
+      document.body.style.display = 'block';
+      if (user) {
+        document.getElementById('telaLogin').style.display = 'none';
+        document.getElementById('conteudoAdmin').style.display = 'block';
+        initAdmin();
+      } else {
+        document.getElementById('telaLogin').style.display = 'flex';
+        document.getElementById('conteudoAdmin').style.display = 'none';
+      }
+    });
+
+    function fazerLogin() {
+      const email = document.getElementById('loginEmail').value;
+      const senha = document.getElementById('loginSenha').value;
+      document.getElementById('loginErro').textContent = '';
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .catch(function() {
+          document.getElementById('loginErro').textContent = '❌ Email ou senha incorretos.';
+        });
+    }
+
+    function fazerLogout() {
+      firebase.auth().signOut();
+    }
+  </script>
 </body>
 </html>
