@@ -395,7 +395,7 @@ function renderCampeonatosPorEsporte() {
   });
 }
 
-function carregarCampeonatosNoForm() {
+function carregarCampeonatosNoForm(callback) {
   const esporte = document.getElementById('esporteJogo')?.value;
   const select = document.getElementById('campeonato');
   if (!select) return;
@@ -411,6 +411,7 @@ function carregarCampeonatosNoForm() {
         const bandeira = c.bandeira || '';
         return `<option value="${nome}" data-bandeira="${bandeira}">${bandeira} ${nome}</option>`;
       }).join('');
+    if (callback) callback(); // ← executa só depois de carregar
   });
 }
 
@@ -507,10 +508,9 @@ function editarJogo(id) {
 
     document.getElementById('editId').value = jogo.id;
     document.getElementById('esporteJogo').value = jogo.esporte || '';
-    carregarCampeonatosNoForm();
-    setTimeout(() => {
-      document.getElementById('campeonato').value = jogo.campeonato;
-    }, 500); // aguarda campeonatos carregarem
+    carregarCampeonatosNoForm(() => {
+  document.getElementById('campeonato').value = jogo.campeonato;
+});
     document.getElementById('mandante').value = jogo.mandante;
     document.getElementById('visitante').value = jogo.visitante;
     document.getElementById('horario').value = jogo.horario;
@@ -620,12 +620,13 @@ document.getElementById('visitante')?.addEventListener('input', () => {
     document.getElementById('status').value = 'agendado';
 
     document.getElementById('esporteJogo').value = esporteSalvo;
-    carregarCampeonatosNoForm();
-    document.getElementById('campeonato').value = campeonatoSalvo;
-    document.getElementById('rodada').value = rodadaSalva;
-    document.getElementById('dataJogo').value = dataSalva;
-    document.getElementById('modoLote').checked = true;
-    toggleModoLote();
+carregarCampeonatosNoForm(() => {
+  document.getElementById('campeonato').value = campeonatoSalvo;
+});
+document.getElementById('rodada').value = rodadaSalva;
+document.getElementById('dataJogo').value = dataSalva;
+document.getElementById('modoLote').checked = true;
+toggleModoLote();
   } else {
     cancelarEdicao();
   }
