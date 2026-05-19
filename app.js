@@ -552,14 +552,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('mandante')?.addEventListener('input', () => {
   const nome = document.getElementById('mandante').value.trim();
-  const escudo = buscarEscudo(nome);
-  if (escudo) document.getElementById('logoMandante').value = escudo;
+  buscarEscudo(nome, url => {
+    if (url) document.getElementById('logoMandante').value = url;
+  });
 });
 
 document.getElementById('visitante')?.addEventListener('input', () => {
   const nome = document.getElementById('visitante').value.trim();
-  const escudo = buscarEscudo(nome);
-  if (escudo) document.getElementById('logoVisitante').value = escudo;
+  buscarEscudo(nome, url => {
+    if (url) document.getElementById('logoVisitante').value = url;
+  });
 });
 
   // Enter nos campos de esporte/campeonato dispara o botão correto
