@@ -597,8 +597,11 @@ document.getElementById('visitante')?.addEventListener('input', () => {
   };
 
   saveJogo(jogo);
-  salvarEscudoTime(jogo.mandante, jogo.logoMandante);
-  salvarEscudoTime(jogo.visitante, jogo.logoVisitante);
+  getTimes(times => {
+  if (jogo.mandante && jogo.logoMandante) times[jogo.mandante.trim()] = jogo.logoMandante.trim();
+  if (jogo.visitante && jogo.logoVisitante) times[jogo.visitante.trim()] = jogo.logoVisitante.trim();
+  saveTimes(times);
+});
 
   const modoLote = document.getElementById('modoLote')?.checked;
   if (modoLote) {
