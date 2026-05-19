@@ -553,8 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mandante')?.addEventListener('input', () => {
   const nome = document.getElementById('mandante').value.trim();
   const campoLogo = document.getElementById('logoMandante');
-  if (!nome) { campoLogo.value = ''; return; } // campo vazio → limpa logo
-  if (campoLogo.value.trim()) return; // já tem URL manual → não sobrescreve
+  if (!nome) { campoLogo.value = ''; return; }
   buscarEscudo(nome, url => {
     if (url) campoLogo.value = url;
   });
@@ -563,8 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('visitante')?.addEventListener('input', () => {
   const nome = document.getElementById('visitante').value.trim();
   const campoLogo = document.getElementById('logoVisitante');
-  if (!nome) { campoLogo.value = ''; return; } // campo vazio → limpa logo
-  if (campoLogo.value.trim()) return; // já tem URL manual → não sobrescreve
+  if (!nome) { campoLogo.value = ''; return; }
   buscarEscudo(nome, url => {
     if (url) campoLogo.value = url;
   });
