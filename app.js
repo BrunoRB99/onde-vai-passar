@@ -117,13 +117,19 @@ let dataSelecionada = hojeStr();
 
 function hojeStr() {
   const d = new Date();
-  return d.toISOString().slice(0, 10); // "2026-05-18"
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
 }
 
 function mudarData(delta) {
   const d = new Date(dataSelecionada + 'T12:00:00');
   d.setDate(d.getDate() + delta);
-  dataSelecionada = d.toISOString().slice(0, 10);
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  dataSelecionada = `${ano}-${mes}-${dia}`;
   gruposAbertos.clear();
   renderJogos();
 }
